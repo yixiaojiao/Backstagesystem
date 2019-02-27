@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+    <style>
+        #imageload{
+            width: 500px;
+            height: 50px;
+            margin: 0 auto;
+        }
+        ._imgg{
+            margin: 0 auto;
+            width: 700px;
+            height: 400px;
+            /* border: 1px solid #f00; */
+        }
+        ._imgg img{
+            width: 100%;
+            height: 100%;
+        }
+        .box{
+            margin: 50px auto;
+            width: 500px;
+            height: 74px;
+            background: #ccc;
+        }
+   </style>
+</head>
+<body>
+    <div class="box">
+            <input type="file" id="imageload"><br>
+            <button onclick="onloadw()">上传</button><br>         
+    </div>
+    <div class="_imgg">
+            <img src="" alt="">
+    </div>
+    
+    
+
+   <script>
+       var OL_Action_Root = 'http://10.9.62.69:3000';
+       function onloadw(){
+        console.log($("#imageload")) 
+        let file=$("#imageload")[0].files[0] 
+        if(file == undefined){
+            alert("请选择上传的图片")
+            return false;
+        }
+        var formData = new FormData()  
+        formData.append('haha',file) 
+
+        $.ajax({
+        url: OL_Action_Root+'/select/upload/img',
+        type: 'POST',
+        data: formData,
+        cache: false, //图片上传不要缓存
+        contentType: false,// josn  urlecode
+        processData: false,// 不需要jq进行默认格式处理
+        success: function(data){
+            if(data.err==0){
+                console.log(data)
+                let imgurl=  OL_Action_Root+data.data
+               $('._imgg img').attr('src',imgurl)
+            }else{
+                alert(data.msg)
+            }
+           
+        }
+    });
+ }   
+   
+   </script>
+
+</body>
+</html>
