@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-mongoose.connect("mongodb://localhost:27017/administration",{ useNewUrlParser: true });
+mongoose.connect("mongodb://10.9.62.69:27017/administration",{ useNewUrlParser: true });
 var db = mongoose.connection;// 获取连接对象进行监听
 db.on('error',(err)=>{
     console.log('连接错误')

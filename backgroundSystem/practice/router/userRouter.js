@@ -37,17 +37,4 @@ router.post('/reg',(req,res)=>{
       res.send({err:-999,msg:"登录失败"})
     })
   })
-  
-  // router.post('/test',(req,res)=>{   
-  //   let {token} = req.body
-  //   // console.log(token)
-  //   if(!token){return res.send({err:-9,msg:"token 缺失"})}
-  //   jsonwebToken.checkToken(token)
-  //   .then((data)=>{
-  //     res.send({err:0,msg:"token 验证成功"})
-  //   })
-  //   .catch(()=>{
-  //     res.send({err:-999,msg:"token 验证失败请重新登录"})
-  //   })
-  // })
   module.exports=router

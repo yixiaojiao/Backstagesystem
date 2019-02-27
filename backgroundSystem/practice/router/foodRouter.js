@@ -87,5 +87,24 @@ router.post('/getFoodOneId',(req,res)=>{
         });
         
     })
+    
+    /*------------------------------------页码查询----------------------*/
 
+    router.post('/getFoodByPage',(req,res)=>{
+        let page=req.body.page||1
+        let pageSize=req.body.pageSize||1
+        let result={count:0,lists:[]}
+        foodModel.find()
+        .then((data)=>{
+         result.count=data.length// 获取总的数据条数
+         return foodModel.find().skip(Number((page-1)*pageSize)).limit(Number(pageSize))
+        })
+        .then((data)=>{
+            result.lists=data
+            res.send({err:0,msg:"发送成功",data:result})
+        })
+        .catch((err)=>{
+         res.send({err:0,msg:"发送失败"})
+        })
+    })
 module.exports=router

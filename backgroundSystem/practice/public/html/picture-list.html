@@ -20,6 +20,46 @@
 <script>DD_belatedPNG.fix('*');</script>
 <![endif]-->
 <title>图片列表</title>
+<style>
+		.alldata{
+			color:red;
+			padding: 0 10px
+		}
+    ._pageqi{
+			padding-top:10px; 
+			width: 800px ;
+			height :40px;
+			margin: 0 auto;
+			text-align: center;
+		}
+		._pageqi button{
+			width: 80px;
+			height: 30px;
+			border:  0;
+			margin: 0 5px;
+		}
+		._pageqi input{
+			width :28px;
+			height: 28px;
+			border: 1px solid #ccc;
+			text-align: center
+		}
+		._pageqi select{
+			width :38px;
+			height: 28px;
+			border: 1px solid #ccc;
+			text-align: center
+		}
+		._pageqi i{
+			color: red;
+			font-style: normal;
+			padding: 0 10px
+		}
+		._pageqi span{
+			display: inline-block;
+			margin: 0 5px;
+		}
+</style>
 </head>
 <body>
 <nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 食品管理 <span class="c-gray en">&gt;</span> 食品列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
@@ -30,7 +70,7 @@
 			<i class="Hui-iconfont">&#xe6e2;</i> 批量删除</a> 
 			<a class="btn btn-primary radius" onclick="picture_add('添加图片','picture-add.html')" href="javascript:;">
 				<i class="Hui-iconfont">&#xe600;</i> 添加图片</a></span> 
-				<span class="r">共有数据：<strong>54</strong> 条</span> </div>
+				<span class="r">共有数据：<strong class="alldata">54</strong> 条</span> </div>
 	<div class="mt-20">
 		<table class="table table-border table-bordered table-bg table-hover table-sort">
 			<thead>
@@ -47,8 +87,23 @@
 				</tr>
 			</thead>
 			<tbody id='tbody'>
-				
-			</tbody>
+				   
+			</tbody>			
+									<div class="_pageqi">
+										<span>加载个数:</span>
+										<select>
+												<option>1</option>
+												<option>5</option>
+												<option>10</option>
+										</select>
+										<button onClick="jumpPage('start')">首页</button>
+										<button onClick="jumpPage('prev')">上一页</button>
+										<span><<i class="dangqian">1</i>/<i class="zongshu">3</i>></span>
+										<input type="text" id='jumpage'>
+										<button onClick="jumpPage('jump')">跳转</button>
+										<button onClick="jumpPage('next')">下一页</button>
+										<button onClick="jumpPage('end')">尾页</button>
+									</div>
 		</table>
 	</div>
 </div>
@@ -65,35 +120,93 @@
 <script type="text/javascript" src="lib/laypage/1.2/laypage.js"></script>
 <script src="cookie.js/testValidate.js"></script>
 <script type="text/javascript">
-$('.table-sort').dataTable({
-	"aaSorting": [[ 1, "desc" ]],//默认第几个排序
-	"bStateSave": true,//状态保存
-	"aoColumnDefs": [
-	  //{"bVisible": false, "aTargets": [ 3 ]} //控制列的隐藏显示
-	  {"orderable":false,"aTargets":[0,8]}// 制定列不参与排序
-	]
-});
-/*------------------------------增加--------------------------------------------------*/
+/*------------------------------增加页面--------------------------------------------------*/
 let rootpath='http://10.9.62.69:3000'
 
-function  getFoodData(){
-	let url='/select/food/foodFind'
-	let data={token:_getCookie("token")}
-	$.post(rootpath+url,data,function(res){
-		console.log()
-		if(res.err == -998){
-			alert("请进行登陆操作")
-			console.log($("ifram"))
-			top.location.href = rootpath+'/static/html/login.html'
-			return false
-		}
-		if(res.err == 0){ 
-			rendList(res.data)
-		}
-	})
-}
-getFoodData()
+// function  getFoodData(){
+// 	let url='/select/food/foodFind'
+// 	let data={token:_getCookie("token")}
+// 	$.post(rootpath+url,data,function(res){
+// 		console.log()
+// 		if(res.err == -998){
+// 			alert("请进行登陆操作")
+// 			console.log($("ifram"))
+// 			top.location.href = rootpath+'/static/html/login.html'
+// 			return false
+// 		}
+// 		if(res.err == 0){ 
+// 			rendList(res.data)
+// 		}
+// 	})
+// }
+// getFoodData()
 
+/*------------------------------分页--------------------------------------------------*/
+
+// $("._pageqi select").val(localStorage.setItem("loadpage",loadpage));
+
+let pageSize=localStorage.getItem("loadpage");
+let page=1;
+let count=0;
+let nowPage=1;
+let token = _getCookie("token")
+$("._pageqi select").val(pageSize)
+$("._pageqi select").on("change",function(){
+	let loadpage = $("._pageqi select").val();
+	localStorage.setItem("loadpage",loadpage)
+	pageSize=localStorage.getItem("loadpage");
+	jumpPage('start');	
+})
+function jumpPage(type){
+		let pageEnd = Math.ceil(count/pageSize)
+		let pageJump = Number($('#jumpage').val());
+   switch (type){
+			case 'start':page=1;break;
+			case 'end':page=pageEnd;break;
+			case 'next':
+			      if(nowPage < pageEnd){
+						  	page = nowPage+1
+						}else{
+							  page = pageEnd
+						}
+			;break;
+			case 'prev':
+						if(nowPage > 1){
+						  	page = nowPage-1
+						}else{
+							  page = 1
+						}
+		  ;break;
+			case 'jump':
+		      	if(pageJump >= 1 && pageJump <= pageEnd){
+						    	page=pageJump
+						}else{
+							    page = nowPage
+						    	alert("无该页 请重新输入")
+						}
+			;break;
+	 } 
+   $.post(rootpath+'/select/food/getFoodByPage',{page,pageSize,token},function(res){
+			if(res.err == -998){
+				alert("请进行登陆操作")
+				console.log($("ifram"))
+				top.location.href = rootpath+'/static/html/login.html'
+				return false
+			}
+		 if(res.err == 0){
+				nowPage=page
+				count =res.data.count
+				rendList(res.data.lists)
+				$(".dangqian").text(page)
+				$(".zongshu").text(Math.ceil(count/pageSize))
+				$(".alldata").text(count)
+			}
+	 })
+}
+jumpPage('start')
+
+
+/*------------------------------渲染--------------------------------------------------*/
 function  rendList(data){
 	let list=''
 	if(!data) return false;
