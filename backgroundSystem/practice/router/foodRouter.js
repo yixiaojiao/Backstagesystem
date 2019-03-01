@@ -107,4 +107,28 @@ router.post('/getFoodOneId',(req,res)=>{
          res.send({err:0,msg:"发送失败"})
         })
     })
+
+    router.post('/getFoodByKw',(req,res)=>{
+        let {keyword}=req.body
+        let page=req.body.page||1
+        let pageSize=req.body.pageSize||1
+        let result={count:0,lists:[]}
+        let reg=new RegExp(keyword)
+        // console.log(reg)
+        foodModel.find({$or:[{name:{$regex:reg}},{type:{$regex:reg}},{desc:{$regex:reg}}]})
+        .then((data)=>{
+            result.count=data.length// 获取总的数据条数
+            return foodModel.find({$or:[{name:{$regex:reg}},{type:{$regex:reg}},{desc:{$regex:reg}}]}).skip(Number((page-1)*pageSize)).limit(Number(pageSize))
+           })
+        .then((data)=>{
+          result.lists=data
+          res.send({err:0,msg:"查询成功",data:result})
+        })
+        .catch((err)=>{
+            res.send({err:0,msg:"查询失败"})
+      })
+    })
+
+
+
 module.exports=router

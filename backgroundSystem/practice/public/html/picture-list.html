@@ -27,7 +27,7 @@
 		}
     ._pageqi{
 			padding-top:10px; 
-			width: 800px ;
+			width: 1100px ;
 			height :40px;
 			margin: 0 auto;
 			text-align: center;
@@ -38,7 +38,7 @@
 			border:  0;
 			margin: 0 5px;
 		}
-		._pageqi input{
+		._pageqi #jumpage{
 			width :28px;
 			height: 28px;
 			border: 1px solid #ccc;
@@ -58,6 +58,12 @@
 		._pageqi span{
 			display: inline-block;
 			margin: 0 5px;
+		}
+	  ._pageqi #_selectl{
+			width :98px;
+			height: 28px;
+			border: 1px solid #ccc;
+			text-align: center
 		}
 </style>
 </head>
@@ -88,8 +94,11 @@
 			</thead>
 			<tbody id='tbody'>
 				   
-			</tbody>			
+			</tbody>		
 									<div class="_pageqi">
+											<button onClick="getFoodByPage()">取消查询</button>
+											<button id="_hakspo">查询:</button>
+											<input id="_selectl" type="text"/>
 										<span>加载个数:</span>
 										<select>
 												<option>1</option>
@@ -144,19 +153,30 @@ let rootpath='http://10.9.62.69:3000'
 /*------------------------------分页--------------------------------------------------*/
 
 // $("._pageqi select").val(localStorage.setItem("loadpage",loadpage));
-
 let pageSize=localStorage.getItem("loadpage");
 let page=1;
 let count=0;
 let nowPage=1;
+let flag = false;
 let token = _getCookie("token")
 $("._pageqi select").val(pageSize)
 $("._pageqi select").on("change",function(){
 	let loadpage = $("._pageqi select").val();
 	localStorage.setItem("loadpage",loadpage)
-	pageSize=localStorage.getItem("loadpage");
+	pageSize = loadpage
 	jumpPage('start');	
 })
+
+$("#_hakspo").on({
+	"click":function(){
+		flag = true;
+		console.log(flag)
+		jumpPage('start')
+	}
+})
+
+
+
 function jumpPage(type){
 		let pageEnd = Math.ceil(count/pageSize)
 		let pageJump = Number($('#jumpage').val());
@@ -186,7 +206,19 @@ function jumpPage(type){
 						}
 			;break;
 	 } 
-   $.post(rootpath+'/select/food/getFoodByPage',{page,pageSize,token},function(res){
+	 
+	 if(flag){
+		   getFoodFind()
+	 }else{
+		  getFoodByPage()
+	 } 
+}
+
+function getFoodByPage(){
+	console.log(flag)
+	flag = false;
+	$("#_selectl").val('')
+	$.post(rootpath+'/select/food/getFoodByPage',{page,pageSize,token},function(res){
 			if(res.err == -998){
 				alert("请进行登陆操作")
 				console.log($("ifram"))
@@ -197,13 +229,48 @@ function jumpPage(type){
 				nowPage=page
 				count =res.data.count
 				rendList(res.data.lists)
-				$(".dangqian").text(page)
+				$(".dangqian").text(nowPage)
 				$(".zongshu").text(Math.ceil(count/pageSize))
 				$(".alldata").text(count)
 			}
 	 })
 }
+
+
 jumpPage('start')
+
+/*————————————————————————————————————查询——————————————————————————————————————————*/
+
+function  getFoodFind(){
+	let keyword = $("#_selectl").val()
+	let url='/select/food/getFoodByKw'
+	// console.log(2)
+	$.post(rootpath+url,{page,pageSize,token,keyword},function(res){	
+		if(res.err !== 0){
+			console.log(err)
+			return false
+		}
+		if(res.err == 0){ 
+			// console.log(res)
+			// rendList(res.data)
+			// $("._pageqi select").val()
+		   	nowPage=page
+				count =res.data.count
+				rendList(res.data.lists)
+				$(".dangqian").text(page)
+				if(Math.ceil(count/pageSize) !== 0){
+					$(".zongshu").text(Math.ceil(count/pageSize))
+				}else{
+					$(".zongshu").text(1) 
+					alert("无该内容")
+					getFoodByPage()
+				}
+				$(".alldata").text(count)
+		}
+	})
+}
+
+
 
 
 /*------------------------------渲染--------------------------------------------------*/
